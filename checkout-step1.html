@@ -351,10 +351,80 @@
   .ref-body {
     padding: 16px;
     border-top: 1px solid var(--border);
-    display: none;
+    display: block;
   }
-  .ref-section.open .ref-body { display: block; }
   .ref-hint { font-size: 12px; color: var(--fg-muted); margin: 8px 0 0; }
+
+  /* ── Saved billing address cards ── */
+  .saved-addr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .saved-bill-card {
+    border: 1.5px solid var(--c-border-control);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    cursor: pointer;
+    position: relative;
+    transition: border-color .15s;
+    background: var(--surface);
+  }
+  .saved-bill-card:hover { border-color: var(--c-border-strong); }
+  .saved-bill-card.selected { border-color: var(--accent); background: var(--c-blue-tint-soft); }
+  .saved-bill-card.new-card {
+    border-style: dashed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: var(--fg-muted);
+    font-size: 13px;
+    font-weight: 500;
+    min-height: 90px;
+  }
+  .saved-bill-card.new-card:hover { color: var(--fg); border-color: var(--c-border-strong); }
+  .saved-bill-name { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+  .saved-bill-addr { font-size: 12px; color: var(--fg-muted); line-height: 1.5; }
+  .saved-bill-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: var(--radius-xs);
+    background: var(--c-navy);
+    color: var(--c-text-on-dark);
+    margin-bottom: 6px;
+  }
+  .card-check {
+    position: absolute;
+    top: 10px; right: 10px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .saved-bill-card.selected .card-check { display: flex; }
+
+  /* Divider between saved cards and form */
+  .addr-form-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: var(--fg-muted);
+  }
+  .addr-form-divider::before,
+  .addr-form-divider::after {
+    content: '';
+    flex: 1;
+    border-top: 1px solid var(--border);
+  }
 </style>
 
 <!-- Top announcement bar -->
@@ -413,6 +483,33 @@
         Rechnungsadresse
       </div>
       <div class="step-body">
+
+        <!-- Saved billing addresses -->
+        <div class="saved-addr-grid">
+
+          <div class="saved-bill-card selected" onclick="selectBillingAddr(this, 'Herr', 'Simon', 'Gussing', 'Balanstraße', '23', '81669', 'München', 'de')">
+            <div class="card-check"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="saved-bill-badge">Standard</div>
+            <div class="saved-bill-name">Simon Gussing</div>
+            <div class="saved-bill-addr">Balanstraße 23<br>81669 München<br>Deutschland</div>
+          </div>
+
+          <div class="saved-bill-card" onclick="selectBillingAddr(this, 'Herr', 'Simon', 'Gussing', 'Leopoldstraße', '100', '80802', 'München', 'de')">
+            <div class="card-check"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="saved-bill-name">Simon Gussing</div>
+            <div class="saved-bill-addr">Leopoldstraße 100<br>80802 München<br>Deutschland</div>
+          </div>
+
+          <div class="saved-bill-card new-card" onclick="selectNewBilling(this)">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            Neue Adresse
+          </div>
+
+        </div>
+
+        <div class="addr-form-divider" id="addr-form-divider" style="display:none;">Adressdetails</div>
+
+        <div id="addr-form-wrap" style="display:none;">
         <div class="form-hint">* Pflichtfeld</div>
 
         <!-- Anrede + Titel -->
@@ -560,12 +657,13 @@
           </div>
         </div>
 
+        </div><!-- end addr-form-wrap -->
+
         <!-- Internal order reference -->
         <div class="ref-section" id="ref-section">
-          <button class="ref-toggle" onclick="toggleRef()" type="button">
-            <svg class="chevron" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Interne Bestellreferenz hinzufügen (optional)
-          </button>
+          <div class="ref-toggle" style="cursor:default;">
+            Interne Bestellreferenz (optional)
+          </div>
           <div class="ref-body">
             <div class="form-row">
               <div class="form-grid">
@@ -660,14 +758,65 @@
 </div>
 
 <script>
-  document.querySelectorAll('.field-input, .field-select').forEach(el => {
-    const label = el.closest('.field-wrap')?.querySelector('.field-label');
-    if (!label) return;
-    const update = () => label.classList.toggle('floating', !!el.value);
-    el.addEventListener('input', update);
-    el.addEventListener('change', update);
-    update();
-  });
+  // Floating labels
+  function refreshLabels() {
+    document.querySelectorAll('.field-input, .field-select').forEach(el => {
+      const label = el.closest('.field-wrap')?.querySelector('.field-label');
+      if (!label) return;
+      const update = () => label.classList.toggle('floating', !!el.value);
+      el.removeEventListener('input', update);
+      el.removeEventListener('change', update);
+      el.addEventListener('input', update);
+      el.addEventListener('change', update);
+      update();
+    });
+  }
+  refreshLabels();
+
+  // Fill form fields from a saved billing address card
+  function setField(selector, value) {
+    const el = document.querySelector(selector);
+    if (!el) return;
+    el.value = value;
+    el.dispatchEvent(new Event('input'));
+    el.dispatchEvent(new Event('change'));
+  }
+
+  function selectBillingAddr(card, anrede, vorname, nachname, strasse, hausnr, plz, ort, land) {
+    document.querySelectorAll('.saved-bill-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    // Hide form — address is already known from saved card
+    document.getElementById('addr-form-wrap').style.display = 'none';
+    document.getElementById('addr-form-divider').style.display = 'none';
+    setField('select.field-select', anrede === 'Herr' ? 'herr' : anrede === 'Frau' ? 'frau' : 'divers');
+    // Vorname / Nachname are inputs — find by order
+    const inputs = document.querySelectorAll('#addr-form-wrap .field-input');
+    if (inputs[0]) { inputs[0].value = vorname; inputs[0].dispatchEvent(new Event('input')); }
+    if (inputs[1]) { inputs[1].value = nachname; inputs[1].dispatchEvent(new Event('input')); }
+    if (inputs[2]) { inputs[2].value = strasse; inputs[2].dispatchEvent(new Event('input')); }
+    if (inputs[3]) { inputs[3].value = hausnr; inputs[3].dispatchEvent(new Event('input')); }
+    if (inputs[4]) { inputs[4].value = plz; inputs[4].dispatchEvent(new Event('input')); }
+    if (inputs[5]) { inputs[5].value = ort; inputs[5].dispatchEvent(new Event('input')); }
+    // Country select
+    const selects = document.querySelectorAll('#addr-form-wrap select');
+    if (selects[1]) { selects[1].value = land; selects[1].dispatchEvent(new Event('change')); }
+  }
+
+  function selectNewBilling(card) {
+    document.querySelectorAll('.saved-bill-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    document.getElementById('addr-form-wrap').style.display = 'block';
+    document.getElementById('addr-form-divider').style.display = 'flex';
+    // Clear all inputs
+    document.querySelectorAll('#addr-form-wrap .field-input').forEach(el => {
+      el.value = '';
+      el.dispatchEvent(new Event('input'));
+    });
+    document.querySelectorAll('#addr-form-wrap select').forEach(el => {
+      el.selectedIndex = 0;
+      el.dispatchEvent(new Event('change'));
+    });
+  }
 
   function toggleRef() {
     document.getElementById('ref-section').classList.toggle('open');
