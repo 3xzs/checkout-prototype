@@ -268,7 +268,224 @@
   .summary-legal { font-size: 11px; color: var(--fg-muted); margin-top: 16px; line-height: 1.6; }
   .summary-legal a { color: var(--accent); text-decoration: none; }
   .summary-legal a:hover { text-decoration: underline; }
+
+  /* ── Invoice copy section ── */
+  .invoice-copy-section {
+    border: 1.5px solid var(--accent);
+    border-radius: var(--radius-sm);
+    background: var(--c-blue-tint-soft);
+    overflow: hidden;
+    margin-top: 16px;
+  }
+  .invoice-copy-header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .invoice-copy-body { padding: 0 16px 16px; }
+  .invoice-copy-body p {
+    font-size: 12px;
+    color: var(--fg-muted);
+    margin: 0 0 12px;
+  }
+
+  /* Email chip input */
+  .email-chips-wrap {
+    min-height: 44px;
+    border: 1px solid var(--c-border-control);
+    border-radius: var(--radius-xs);
+    background: var(--surface);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+    cursor: text;
+    margin-bottom: 10px;
+  }
+  .email-chips-wrap:focus-within { border-color: var(--accent); }
+  .email-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--accent);
+    color: white;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 3px 8px 3px 10px;
+    border-radius: var(--radius-pill);
+  }
+  .chip-remove {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    opacity: .8;
+  }
+  .chip-remove:hover { opacity: 1; }
+  .chip-input {
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--fg);
+    background: transparent;
+    min-width: 180px;
+    flex: 1;
+  }
+  .chip-label {
+    font-size: 11px;
+    color: var(--fg-muted);
+    margin-bottom: 5px;
+  }
+  .message-field {
+    width: 100%;
+    border: 1px solid var(--c-border-control);
+    border-radius: var(--radius-xs);
+    background: var(--surface);
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--fg);
+    padding: 10px;
+    resize: vertical;
+    min-height: 72px;
+  }
+  .message-field:focus { outline: none; border-color: var(--accent); }
+
+  /* ── Approval section ── */
+  .approval-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 13px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    background: var(--surface);
+    transition: border-color .15s, background .15s;
+    user-select: none;
+  }
+  .approval-toggle-row:hover { border-color: #d97706; }
+  .approval-toggle-row.checked { border-color: #d97706; background: #fffbeb; }
+  .approval-checkbox {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 2px solid var(--c-border-control);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+  }
+  .approval-toggle-row.checked .approval-checkbox { background: #d97706; border-color: #d97706; }
+  .approval-toggle-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg);
+    flex: 1;
+  }
+  .approval-section {
+    border: 1.5px solid #d97706;
+    border-radius: var(--radius-sm);
+    background: #fffbeb;
+    overflow: hidden;
+    margin-top: 8px;
+    display: none;
+  }
+  .approval-section.open { display: block; }
+  .approval-section-header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #92400e;
+  }
+  .approval-section-body { padding: 0 16px 16px; }
+  .approval-section-body p {
+    font-size: 12px;
+    color: #78350f;
+    margin: 0 0 12px;
+  }
+  .approval-input {
+    width: 100%;
+    border: 1px solid #fcd34d;
+    border-radius: var(--radius-xs);
+    background: white;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--fg);
+    padding: 10px 12px;
+  }
+  .approval-input:focus { outline: none; border-color: #d97706; }
 </style>
+
+<script>
+  function selectPayment(el, showInvoiceCopy) {
+    document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    const section = document.getElementById('invoice-copy');
+    if (section) section.style.display = showInvoiceCopy ? 'block' : 'none';
+    const approvalWrap = document.getElementById('approval-wrap');
+    if (approvalWrap) approvalWrap.style.display = showInvoiceCopy ? 'block' : 'none';
+    if (!showInvoiceCopy) setApproval(false);
+  }
+
+  function toggleApproval() {
+    const row = document.getElementById('approval-row');
+    const isChecked = row.classList.toggle('checked');
+    setApproval(isChecked);
+  }
+
+  function setApproval(on) {
+    const row = document.getElementById('approval-row');
+    const section = document.getElementById('approval-section');
+    const icon = document.getElementById('approval-check-icon');
+    if (on) {
+      row.classList.add('checked');
+      section.classList.add('open');
+      if (icon) icon.style.display = 'block';
+    } else {
+      row.classList.remove('checked');
+      section.classList.remove('open');
+      if (icon) icon.style.display = 'none';
+    }
+    try { sessionStorage.setItem('approvalRequested', on ? '1' : '0'); } catch(e) {}
+  }
+
+  // Chip input — press Enter or comma to add chip
+  document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('chip-input');
+    if (!input) return;
+    input.addEventListener('keydown', e => {
+      if ((e.key === 'Enter' || e.key === ',') && input.value.trim()) {
+        e.preventDefault();
+        const email = input.value.trim().replace(/,$/, '');
+        if (email) {
+          const chip = document.createElement('div');
+          chip.className = 'email-chip';
+          chip.innerHTML = email + ' <button class="chip-remove" type="button" onclick="removeChip(this)">×</button>';
+          input.before(chip);
+          input.value = '';
+        }
+      }
+    });
+  });
+
+  function removeChip(btn) {
+    btn.closest('.email-chip').remove();
+  }
+</script>
 
 <!-- Topbar -->
 <div class="topbar">
@@ -295,7 +512,7 @@
 <!-- Header -->
 <header class="header">
   <div class="header-inner">
-    <a href="#" class="logo" aria-label="Conrad">
+    <a href="index.html" class="logo" aria-label="Conrad">
       <svg width="160" height="40" viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_s3)">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M37.7528 0L36.1809 6.88901H26.1698C16.9036 6.88901 11.8011 12.8209 11.8011 23.592C11.8011 30.5305 14.7584 33.1104 22.7123 33.1104H30.26L28.7167 40H15.5869C3.94266 40 0 36.3155 0 25.4795C0 16.6882 2.78962 8.76173 7.33826 4.55168C10.7957 1.36311 15.7071 0 23.7738 0H37.7528ZM39.3954 9.77778C46.1119 9.77778 48.5393 11.7969 48.5393 17.3328C48.5393 25.5503 43.8927 30.2212 35.7373 30.2212L23.4066 30.2222C16.6906 30.2222 14.382 28.463 14.382 23.3874C14.382 14.5638 18.7593 9.77778 26.7948 9.77778H39.3954ZM62.4173 9.77778L68.2557 21.5714L71.087 9.77778H79.1011L74.2156 30.2222H65.8731L58.8715 16.67L55.654 30.2222H47.6404L52.4967 9.77778H62.4173ZM96.6532 9.77778C103.594 9.77778 106.358 11.565 106.358 16.0066C106.358 20.1002 103.714 22.7535 98.696 23.7633L101.955 27.6459L110.708 16.093C115.223 10.109 115.616 9.79206 122.183 9.77834L133.034 9.77778L128.107 30.2222H119.633L120.504 26.5608H111.581L108.935 30.2222H100.47C95.7216 30.2222 95.5112 30.1077 93.1378 26.329L89.081 19.7836H95.0009C97.3438 19.7836 98.4857 18.8619 98.4857 17.0158C98.4857 15.7181 97.2241 15.026 94.8195 15.026H89.4427L85.7759 30.2222H77.3034L82.2305 9.77778H96.6532ZM151.633 9.77778C157.499 9.77778 160 11.9983 160 17.2465C160 25.7239 155.772 30.2222 147.82 30.2222H130.337L135.193 9.77778H151.633ZM29.7026 15.1981C25.3553 15.1981 22.8566 17.6208 22.8566 22.0329C22.8566 24.541 24.0369 25.2914 27.7833 25.2914L33.2493 25.292C37.3567 25.292 39.5759 22.8396 39.5759 18.2556C39.5759 15.8329 38.6768 15.1986 35.2291 15.1986L29.7026 15.1981ZM147.104 15.026H142.341L139.957 24.9751H145.676C149.19 24.9751 151.393 22.3796 151.393 18.2557C151.393 15.7181 150.47 15.026 147.104 15.026ZM123.019 15.026H122.449C119.834 15.026 119.293 15.3431 117.49 17.9678L114.967 21.5714H121.457L123.019 15.026Z" fill="#FEFEFF"></path>
@@ -362,7 +579,7 @@
       <div class="step-body">
 
         <!-- PayPal -->
-        <div class="payment-option">
+        <div class="payment-option" onclick="selectPayment(this, false)">
           <div class="radio-circle"><div class="radio-dot"></div></div>
           <div class="payment-label">PayPal</div>
           <div class="payment-logo">
@@ -375,7 +592,7 @@
         </div>
 
         <!-- Rechnung (selected) -->
-        <div class="payment-option selected">
+        <div class="payment-option selected" onclick="selectPayment(this, true)">
           <div class="radio-circle"><div class="radio-dot"></div></div>
           <div class="payment-label">
             Rechnung
@@ -387,7 +604,7 @@
         </div>
 
         <!-- Bankeinzug -->
-        <div class="payment-option">
+        <div class="payment-option" onclick="selectPayment(this, false)">
           <div class="radio-circle"><div class="radio-dot"></div></div>
           <div class="payment-label">Bankeinzug</div>
           <div class="payment-logo">
@@ -396,7 +613,7 @@
         </div>
 
         <!-- Kreditkarte -->
-        <div class="payment-option">
+        <div class="payment-option" onclick="selectPayment(this, false)">
           <div class="radio-circle"><div class="radio-dot"></div></div>
           <div class="payment-label">Kreditkarte</div>
           <div class="payment-logo">
@@ -421,11 +638,56 @@
         </div>
 
         <!-- Vorauskasse -->
-        <div class="payment-option">
+        <div class="payment-option" onclick="selectPayment(this, false)">
           <div class="radio-circle"><div class="radio-dot"></div></div>
           <div class="payment-label">Vorauskasse</div>
           <div class="payment-logo">
             <span class="payment-text-badge">Vorauskasse</span>
+          </div>
+        </div>
+
+        <!-- Invoice copy section — shown when Rechnung is selected -->
+        <div class="invoice-copy-section" id="invoice-copy">
+          <div class="invoice-copy-header">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2 2h11v11H2zM5 5h5M5 7.5h5M5 10h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Rechnungskopie an weitere Empfänger senden
+          </div>
+          <div class="invoice-copy-body">
+            <p>Optional: Die Rechnung wird zusätzlich an folgende E-Mail-Adressen weitergeleitet.</p>
+            <div class="chip-label">Empfänger-E-Mail(s)</div>
+            <div class="email-chips-wrap" id="chips-wrap" onclick="document.getElementById('chip-input').focus()">
+              <div class="email-chip">buchhaltung@firma.de <button class="chip-remove" onclick="removeChip(this)" type="button">×</button></div>
+              <input class="chip-input" id="chip-input" type="email" placeholder="E-Mail eingeben, Enter drücken">
+            </div>
+            <div class="chip-label">Nachricht (optional)</div>
+            <textarea class="message-field" placeholder="z. B. Für Projekt X – bitte bis Monatsende verbuchen"></textarea>
+          </div>
+        </div>
+
+        <!-- Approval section — shown when Rechnung is selected -->
+        <div id="approval-wrap">
+          <div class="approval-toggle-row" id="approval-row" onclick="toggleApproval()">
+            <div class="approval-checkbox">
+              <svg width="11" height="9" viewBox="0 0 11 9" fill="none" style="display:none" id="approval-check-icon"><path d="M1 4.5L4 7.5L10 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="approval-toggle-label">
+              Zur Genehmigung einreichen
+              <div style="font-size:12px; font-weight:400; color: var(--fg-muted); margin-top:2px;">Diese Bestellung wird vor dem Kauf zur Freigabe weitergeleitet.</div>
+            </div>
+          </div>
+
+          <div class="approval-section" id="approval-section">
+            <div class="approval-section-header">
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1.5a6 6 0 1 1 0 12 6 6 0 0 1 0-12zM7.5 5v3.5M7.5 10v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              Genehmigung anfordern
+            </div>
+            <div class="approval-section-body">
+              <p>Die Bestellung wird zur Freigabe an folgende Person gesendet. Sie erhalten eine Benachrichtigung, sobald die Genehmigung erteilt wurde.</p>
+              <div class="chip-label">E-Mail des Genehmigenden</div>
+              <input class="approval-input" type="email" placeholder="z. B. m.schmidt@firma.de" value="m.schmidt@firma.de" style="margin-bottom:10px;">
+              <div class="chip-label">Nachricht (optional)</div>
+              <textarea class="message-field approval-input" placeholder="z. B. Für Projekt X – bitte bis Freitag genehmigen" style="border-color:#fcd34d;"></textarea>
+            </div>
           </div>
         </div>
 

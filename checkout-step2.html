@@ -376,7 +376,96 @@
 
   .summary-legal a { color: var(--accent); text-decoration: none; }
   .summary-legal a:hover { text-decoration: underline; }
+
+  /* ── Sub-section labels ── */
+  .subsection-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin-bottom: 12px;
+  }
+
+  /* ── Toggle switch ── */
+  .same-as-billing {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--fg);
+    user-select: none;
+  }
+  .toggle-track {
+    width: 36px;
+    height: 20px;
+    border-radius: var(--radius-pill);
+    background: var(--c-border-control);
+    position: relative;
+    flex-shrink: 0;
+    transition: background .2s;
+    cursor: pointer;
+  }
+  .toggle-track.active { background: var(--accent); }
+  .toggle-thumb {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 16px; height: 16px;
+    border-radius: var(--radius-pill);
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    transition: left .2s;
+  }
+  .toggle-track.active .toggle-thumb { left: 18px; }
+
+  /* ── Save address checkbox ── */
+  .save-addr-check {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--fg-muted);
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  .save-addr-check input { accent-color: var(--accent); }
 </style>
+
+<script>
+  let sameAsBilling = false;
+  function toggleSameAsBilling() {
+    sameAsBilling = !sameAsBilling;
+    document.getElementById('billing-toggle').classList.toggle('active', sameAsBilling);
+    document.getElementById('address-selector').style.display = sameAsBilling ? 'none' : 'block';
+  }
+
+  let sameAsHolder = true;
+  function toggleSameAsHolder() {
+    sameAsHolder = !sameAsHolder;
+    document.getElementById('holder-toggle').classList.toggle('active', sameAsHolder);
+    document.getElementById('recipient-fields').style.display = sameAsHolder ? 'none' : 'block';
+  }
+
+  function selectAddress(el) {
+    document.querySelectorAll('.address-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  function selectShipping(el) {
+    document.querySelectorAll('.shipping-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  let newAddrOpen = false;
+  function toggleNewAddress() {
+    newAddrOpen = !newAddrOpen;
+    document.getElementById('new-address-form').style.display = newAddrOpen ? 'block' : 'none';
+    const icon = document.getElementById('new-addr-btn').querySelector('svg');
+    if (icon) icon.style.transform = newAddrOpen ? 'rotate(45deg)' : '';
+  }
+</script>
 
 <!-- Topbar -->
 <div class="topbar">
@@ -403,7 +492,7 @@
 <!-- Header -->
 <header class="header">
   <div class="header-inner">
-    <a href="#" class="logo" aria-label="Conrad">
+    <a href="index.html" class="logo" aria-label="Conrad">
       <svg width="160" height="40" viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_5005_27010b)">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M37.7528 0L36.1809 6.88901H26.1698C16.9036 6.88901 11.8011 12.8209 11.8011 23.592C11.8011 30.5305 14.7584 33.1104 22.7123 33.1104H30.26L28.7167 40H15.5869C3.94266 40 0 36.3155 0 25.4795C0 16.6882 2.78962 8.76173 7.33826 4.55168C10.7957 1.36311 15.7071 0 23.7738 0H37.7528ZM39.3954 9.77778C46.1119 9.77778 48.5393 11.7969 48.5393 17.3328C48.5393 25.5503 43.8927 30.2212 35.7373 30.2212L23.4066 30.2222C16.6906 30.2222 14.382 28.463 14.382 23.3874C14.382 14.5638 18.7593 9.77778 26.7948 9.77778H39.3954ZM62.4173 9.77778L68.2557 21.5714L71.087 9.77778H79.1011L74.2156 30.2222H65.8731L58.8715 16.67L55.654 30.2222H47.6404L52.4967 9.77778H62.4173ZM96.6532 9.77778C103.594 9.77778 106.358 11.565 106.358 16.0066C106.358 20.1002 103.714 22.7535 98.696 23.7633L101.955 27.6459L110.708 16.093C115.223 10.109 115.616 9.79206 122.183 9.77834L133.034 9.77778L128.107 30.2222H119.633L120.504 26.5608H111.581L108.935 30.2222H100.47C95.7216 30.2222 95.5112 30.1077 93.1378 26.329L89.081 19.7836H95.0009C97.3438 19.7836 98.4857 18.8619 98.4857 17.0158C98.4857 15.7181 97.2241 15.026 94.8195 15.026H89.4427L85.7759 30.2222H77.3034L82.2305 9.77778H96.6532ZM151.633 9.77778C157.499 9.77778 160 11.9983 160 17.2465C160 25.7239 155.772 30.2222 147.82 30.2222H130.337L135.193 9.77778H151.633ZM29.7026 15.1981C25.3553 15.1981 22.8566 17.6208 22.8566 22.0329C22.8566 24.541 24.0369 25.2914 27.7833 25.2914L33.2493 25.292C37.3567 25.292 39.5759 22.8396 39.5759 18.2556C39.5759 15.8329 38.6768 15.1986 35.2291 15.1986L29.7026 15.1981ZM147.104 15.026H142.341L139.957 24.9751H145.676C149.19 24.9751 151.393 22.3796 151.393 18.2557C151.393 15.7181 150.47 15.026 147.104 15.026ZM123.019 15.026H122.449C119.834 15.026 119.293 15.3431 117.49 17.9678L114.967 21.5714H121.457L123.019 15.026Z" fill="#FEFEFF"></path>
@@ -455,47 +544,110 @@
       </div>
       <div class="step-body">
 
-        <!-- Delivery type tabs -->
-        <div class="delivery-tabs">
-          <button class="delivery-tab active">Lieferung an Adresse</button>
-          <button class="delivery-tab">Packstation</button>
-          <button class="delivery-tab">Abholen</button>
-        </div>
+        <!-- ── Lieferadresse ── -->
+        <div class="subsection-label">Lieferadresse</div>
 
-        <!-- Address option -->
-        <div class="address-option selected">
-          <div class="radio-circle"><div class="radio-dot"></div></div>
-          <div class="address-text">
-            Simon Gussing<br>
-            Balanstraße 23<br>
-            81669 München<br>
-            Deutschland
+        <!-- Same as billing toggle -->
+        <label class="same-as-billing" id="same-billing-label">
+          <div class="toggle-track" id="billing-toggle" onclick="toggleSameAsBilling()">
+            <div class="toggle-thumb"></div>
           </div>
-          <span class="address-badge">entspricht Rechnungsadresse</span>
+          <span>Gleich wie Rechnungsadresse</span>
+        </label>
+
+        <!-- Saved address cards (hidden when "same as billing" is active) -->
+        <div id="address-selector">
+          <div class="address-option selected" onclick="selectAddress(this)">
+            <div class="radio-circle"><div class="radio-dot"></div></div>
+            <div class="address-text">
+              Balanstraße 23<br>
+              81669 München<br>
+              Deutschland
+            </div>
+            <span class="address-badge">Rechnungsadresse</span>
+          </div>
+          <div class="address-option" onclick="selectAddress(this)">
+            <div class="radio-circle"><div class="radio-dot"></div></div>
+            <div class="address-text">
+              Leopoldstraße 100<br>
+              80802 München<br>
+              Deutschland
+            </div>
+            <span class="address-badge">Gespeichert</span>
+          </div>
+
+          <!-- New address expander -->
+          <button class="add-address-btn" id="new-addr-btn" onclick="toggleNewAddress()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Neue Adresse eingeben
+          </button>
+
+          <div id="new-address-form" style="display:none; padding: 14px; border: 1.5px solid var(--accent); border-radius: var(--radius-sm); margin-bottom: 12px;">
+            <div class="form-grid cols-3" style="margin-bottom: 10px;">
+              <div class="form-field">
+                <div class="field-wrap"><label class="field-label floating">Straße*</label><input class="field-input" type="text"></div>
+              </div>
+              <div class="form-field">
+                <div class="field-wrap"><label class="field-label floating">Nr.*</label><input class="field-input" type="text"></div>
+              </div>
+            </div>
+            <div class="form-grid cols-zip" style="margin-bottom: 10px;">
+              <div class="form-field">
+                <div class="field-wrap"><label class="field-label floating">PLZ*</label><input class="field-input" type="text"></div>
+              </div>
+              <div class="form-field">
+                <div class="field-wrap"><label class="field-label floating">Ort*</label><input class="field-input" type="text"></div>
+              </div>
+            </div>
+            <label class="save-addr-check">
+              <input type="checkbox" checked> Diese Adresse für spätere Bestellungen speichern
+            </label>
+          </div>
         </div>
 
-        <!-- Add new address -->
-        <button class="add-address-btn">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          Neue abweichende Adresse anlegen
-        </button>
+        <!-- ── Warenempfänger ── -->
+        <div class="subsection-label" style="margin-top: 20px;">Warenempfänger</div>
 
-        <!-- Shipping method -->
-        <div class="section-label">Versandart</div>
+        <label class="same-as-billing" id="same-holder-label">
+          <div class="toggle-track active" id="holder-toggle" onclick="toggleSameAsHolder()">
+            <div class="toggle-thumb"></div>
+          </div>
+          <span>Gleich wie Kontoinhaber (Simon Gussing)</span>
+        </label>
 
-        <div class="shipping-option selected">
+        <div id="recipient-fields" style="display:none;">
+          <div class="form-grid" style="margin-bottom: 10px;">
+            <div class="form-field">
+              <div class="field-wrap"><label class="field-label floating">Vorname*</label><input class="field-input" type="text"></div>
+            </div>
+            <div class="form-field">
+              <div class="field-wrap"><label class="field-label floating">Nachname*</label><input class="field-input" type="text"></div>
+            </div>
+          </div>
+          <div class="form-field" style="max-width: 280px; margin-bottom: 10px;">
+            <div class="field-wrap"><label class="field-label floating">Telefon (optional)</label><input class="field-input" type="tel"></div>
+          </div>
+        </div>
+
+        <!-- ── Versandart ── -->
+        <div class="subsection-label" style="margin-top: 20px;">Versandart</div>
+
+        <div class="shipping-option selected" onclick="selectShipping(this)">
           <div class="radio-circle"><div class="radio-dot"></div></div>
           <div class="shipping-info">
             <div class="shipping-name">Standardversand</div>
-            <div class="shipping-desc">Lieferung innerhalb 1-3 Werktagen. Bitte beachten Sie die angegebene Lieferzeit je Artikel.</div>
+            <div class="shipping-desc">Lieferung innerhalb 1–3 Werktagen.</div>
           </div>
+          <span style="font-size:14px; font-weight:600; color: var(--green); white-space: nowrap;">Kostenfrei</span>
         </div>
 
-        <div class="shipping-option">
+        <div class="shipping-option" onclick="selectShipping(this)">
           <div class="radio-circle"><div class="radio-dot"></div></div>
           <div class="shipping-info">
-            <div class="shipping-name">24h-Lieferung (zzgl. 10,95 €)</div>
+            <div class="shipping-name">24h-Lieferung</div>
+            <div class="shipping-desc">Lieferung am nächsten Werktag.</div>
           </div>
+          <span style="font-size:14px; font-weight:600; color: var(--fg); white-space: nowrap;">+ 10,95 €</span>
         </div>
 
         <div style="overflow: hidden;">
