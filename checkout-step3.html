@@ -358,6 +358,76 @@
     min-height: 72px;
   }
   .message-field:focus { outline: none; border-color: var(--accent); }
+
+  /* ── Approval section ── */
+  .approval-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 13px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    background: var(--surface);
+    transition: border-color .15s, background .15s;
+    user-select: none;
+  }
+  .approval-toggle-row:hover { border-color: #d97706; }
+  .approval-toggle-row.checked { border-color: #d97706; background: #fffbeb; }
+  .approval-checkbox {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 2px solid var(--c-border-control);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+  }
+  .approval-toggle-row.checked .approval-checkbox { background: #d97706; border-color: #d97706; }
+  .approval-toggle-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg);
+    flex: 1;
+  }
+  .approval-section {
+    border: 1.5px solid #d97706;
+    border-radius: var(--radius-sm);
+    background: #fffbeb;
+    overflow: hidden;
+    margin-top: 8px;
+    display: none;
+  }
+  .approval-section.open { display: block; }
+  .approval-section-header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #92400e;
+  }
+  .approval-section-body { padding: 0 16px 16px; }
+  .approval-section-body p {
+    font-size: 12px;
+    color: #78350f;
+    margin: 0 0 12px;
+  }
+  .approval-input {
+    width: 100%;
+    border: 1px solid #fcd34d;
+    border-radius: var(--radius-xs);
+    background: white;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--fg);
+    padding: 10px 12px;
+  }
+  .approval-input:focus { outline: none; border-color: #d97706; }
 </style>
 
 <script>
@@ -366,6 +436,31 @@
     el.classList.add('selected');
     const section = document.getElementById('invoice-copy');
     if (section) section.style.display = showInvoiceCopy ? 'block' : 'none';
+    const approvalWrap = document.getElementById('approval-wrap');
+    if (approvalWrap) approvalWrap.style.display = showInvoiceCopy ? 'block' : 'none';
+    if (!showInvoiceCopy) setApproval(false);
+  }
+
+  function toggleApproval() {
+    const row = document.getElementById('approval-row');
+    const isChecked = row.classList.toggle('checked');
+    setApproval(isChecked);
+  }
+
+  function setApproval(on) {
+    const row = document.getElementById('approval-row');
+    const section = document.getElementById('approval-section');
+    const icon = document.getElementById('approval-check-icon');
+    if (on) {
+      row.classList.add('checked');
+      section.classList.add('open');
+      if (icon) icon.style.display = 'block';
+    } else {
+      row.classList.remove('checked');
+      section.classList.remove('open');
+      if (icon) icon.style.display = 'none';
+    }
+    try { sessionStorage.setItem('approvalRequested', on ? '1' : '0'); } catch(e) {}
   }
 
   // Chip input — press Enter or comma to add chip
@@ -566,6 +661,33 @@
             </div>
             <div class="chip-label">Nachricht (optional)</div>
             <textarea class="message-field" placeholder="z. B. Für Projekt X – bitte bis Monatsende verbuchen"></textarea>
+          </div>
+        </div>
+
+        <!-- Approval section — shown when Rechnung is selected -->
+        <div id="approval-wrap">
+          <div class="approval-toggle-row" id="approval-row" onclick="toggleApproval()">
+            <div class="approval-checkbox">
+              <svg width="11" height="9" viewBox="0 0 11 9" fill="none" style="display:none" id="approval-check-icon"><path d="M1 4.5L4 7.5L10 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="approval-toggle-label">
+              Zur Genehmigung einreichen
+              <div style="font-size:12px; font-weight:400; color: var(--fg-muted); margin-top:2px;">Diese Bestellung wird vor dem Kauf zur Freigabe weitergeleitet.</div>
+            </div>
+          </div>
+
+          <div class="approval-section" id="approval-section">
+            <div class="approval-section-header">
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1.5a6 6 0 1 1 0 12 6 6 0 0 1 0-12zM7.5 5v3.5M7.5 10v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              Genehmigung anfordern
+            </div>
+            <div class="approval-section-body">
+              <p>Die Bestellung wird zur Freigabe an folgende Person gesendet. Sie erhalten eine Benachrichtigung, sobald die Genehmigung erteilt wurde.</p>
+              <div class="chip-label">E-Mail des Genehmigenden</div>
+              <input class="approval-input" type="email" placeholder="z. B. m.schmidt@firma.de" value="m.schmidt@firma.de" style="margin-bottom:10px;">
+              <div class="chip-label">Nachricht (optional)</div>
+              <textarea class="message-field approval-input" placeholder="z. B. Für Projekt X – bitte bis Freitag genehmigen" style="border-color:#fcd34d;"></textarea>
+            </div>
           </div>
         </div>
 

@@ -668,12 +668,12 @@
 
         <!-- Bottom CTA -->
         <div class="cta-wrap">
-          <p style="font-size: 13px; color: var(--fg-muted); margin: 0 0 14px; display: flex; align-items: flex-start; gap: 8px;">
+          <p id="cta-approval-note" style="font-size: 13px; color: var(--fg-muted); margin: 0 0 14px; display: flex; align-items: flex-start; gap: 8px; display: none;">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0; margin-top:1px;"><circle cx="8" cy="8" r="7" stroke="#d97706" stroke-width="1.5"/><path d="M8 5v4M8 11v.5" stroke="#d97706" stroke-width="1.5" stroke-linecap="round"/></svg>
             <span>Diese Bestellung wird zur Genehmigung an <strong>m.schmidt@firma.de</strong> gesendet.</span>
           </p>
-          <button class="btn-order" onclick="location.href='checkout-approval.html'">
-            Zur Genehmigung einreichen
+          <button class="btn-order" id="cta-btn" onclick="location.href='checkout-approval.html'">
+            Jetzt kaufen
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
         </div>
@@ -705,8 +705,8 @@
     </div>
     <div class="summary-vat">inkl. MwSt.</div>
 
-    <button class="btn-order-summary" style="margin-top: 20px;" onclick="location.href='checkout-approval.html'">
-      Zur Genehmigung einreichen
+    <button class="btn-order-summary" id="cta-btn-summary" style="margin-top: 20px;" onclick="location.href='checkout-approval.html'">
+      Jetzt kaufen
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
 
@@ -779,3 +779,19 @@
     <a href="#">Widerruf</a>
   </div>
 </div>
+
+<script>
+  (function() {
+    var approval = false;
+    try { approval = sessionStorage.getItem('approvalRequested') === '1'; } catch(e) {}
+    var label = approval ? 'Zur Genehmigung einreichen' : 'Jetzt kaufen';
+    var dest = approval ? 'checkout-approval.html' : '#';
+    var arrowSvg = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    var btn = document.getElementById('cta-btn');
+    var btnS = document.getElementById('cta-btn-summary');
+    var note = document.getElementById('cta-approval-note');
+    if (btn) { btn.innerHTML = label + ' ' + arrowSvg; btn.setAttribute('onclick', "location.href='" + dest + "'"); }
+    if (btnS) { btnS.innerHTML = label + ' ' + arrowSvg; btnS.setAttribute('onclick', "location.href='" + dest + "'"); }
+    if (note) note.style.display = approval ? 'flex' : 'none';
+  })();
+</script>
