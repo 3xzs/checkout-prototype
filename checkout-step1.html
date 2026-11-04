@@ -321,6 +321,40 @@
 
   .summary-legal a { color: var(--accent); text-decoration: none; }
   .summary-legal a:hover { text-decoration: underline; }
+
+  /* ── Internal reference section ── */
+  .ref-section {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-top: 20px;
+    margin-bottom: 0;
+    overflow: hidden;
+  }
+  .ref-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    background: var(--c-bg-tint);
+    border: none;
+    padding: 11px 14px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg-muted);
+    cursor: pointer;
+    text-align: left;
+  }
+  .ref-toggle:hover { color: var(--fg); }
+  .ref-toggle .chevron { transition: transform .2s; flex-shrink: 0; margin-right: 2px; }
+  .ref-section.open .ref-toggle .chevron { transform: rotate(180deg); }
+  .ref-body {
+    padding: 16px;
+    border-top: 1px solid var(--border);
+    display: none;
+  }
+  .ref-section.open .ref-body { display: block; }
+  .ref-hint { font-size: 12px; color: var(--fg-muted); margin: 8px 0 0; }
 </style>
 
 <!-- Top announcement bar -->
@@ -526,7 +560,42 @@
           </div>
         </div>
 
-        <div style="overflow: hidden;">
+        <!-- Internal order reference -->
+        <div class="ref-section" id="ref-section">
+          <button class="ref-toggle" onclick="toggleRef()" type="button">
+            <svg class="chevron" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Interne Bestellreferenz hinzufügen (optional)
+          </button>
+          <div class="ref-body">
+            <div class="form-row">
+              <div class="form-grid">
+                <div class="form-field">
+                  <div class="field-wrap">
+                    <label class="field-label">Interne Referenznummer</label>
+                    <input class="field-input" type="text">
+                  </div>
+                </div>
+                <div class="form-field">
+                  <div class="field-wrap">
+                    <label class="field-label">Kostenstelle</label>
+                    <input class="field-input" type="text">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-field" style="max-width: 320px;">
+                <div class="field-wrap">
+                  <label class="field-label">Bestellnummer (PO)</label>
+                  <input class="field-input" type="text">
+                </div>
+              </div>
+            </div>
+            <p class="ref-hint">Diese Angaben erscheinen auf Ihrer Rechnung.</p>
+          </div>
+        </div>
+
+        <div style="overflow: hidden; margin-top: 20px;">
           <button class="btn-next" onclick="location.href='checkout-step2.html'">
             Weiter
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -591,24 +660,16 @@
 </div>
 
 <script>
-  // Floating labels for inputs
   document.querySelectorAll('.field-input, .field-select').forEach(el => {
-    const label = el.closest('.field-wrap')?.previousElementSibling?.classList.contains('field-label')
-      ? el.closest('.field-wrap').querySelector('.field-label')
-      : el.closest('.field-wrap')?.querySelector('.field-label');
-
+    const label = el.closest('.field-wrap')?.querySelector('.field-label');
     if (!label) return;
-
-    const update = () => {
-      if (el.value) {
-        label.classList.add('floating');
-      } else {
-        label.classList.remove('floating');
-      }
-    };
-
+    const update = () => label.classList.toggle('floating', !!el.value);
     el.addEventListener('input', update);
     el.addEventListener('change', update);
     update();
   });
+
+  function toggleRef() {
+    document.getElementById('ref-section').classList.toggle('open');
+  }
 </script>
